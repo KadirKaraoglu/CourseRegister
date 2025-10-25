@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapay Zeka Eğitim Kayıt Sistemi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc',
+                            400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1',
+                            800: '#075985', 900: '#0c4a6e'
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
+        .input-error { border-color: #ef4444 !important; background-color: #fef2f2; }
+        .error-message { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: none; }
+        .error-message.show { display: block; }
+        input:focus { outline: none; border-color: #0ea5e9; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-gradient-to-r from-primary-600 to-primary-800 text-white">
+        <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-brain text-2xl"></i>
+                <span class="font-semibold text-xl">YZESKS</span>
+            </div>
+        </nav>
+        <div class="container mx-auto px-4 py-16">
+            <h1 class="text-4xl font-bold mb-4">Yapay Zeka Eğitim Kayıt Sistemi</h1>
+            <p class="text-xl mb-8">Geleceğin teknolojisini öğrenmek için hemen kayıt olun</p>
+        </div>
+    </header>
+    <main class="container mx-auto px-4 py-8">
+        <section id="groupList" class="py-8">
+            <h2 class="text-3xl font-bold text-center mb-8">Açık Eğitim Grupları</h2>
+            <div id="groupListContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </section>
+        <div id="registrationModal" class="fixed inset-0 z-50 hidden">
+            <div class="modal-backdrop absolute inset-0" onclick="app.closeModal()"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-4">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl animate-slide-up">
+                    <div class="p-6"><div id="formStep">
+                        <h2 class="text-2xl font-semibold mb-4">Kayıt Formu</h2>
+                        <p id="selectedGroupInfo" class="text-gray-600 mb-4"></p>
+                        <form id="registrationForm" class="space-y-4">
+                            <div>
+                                <input type="text" name="fullName" placeholder="Ad Soyad" required 
+                                       minlength="3" maxlength="50"
+                                       class="w-full px-4 py-2 border rounded" 
+                                       oninput="validateFullName(this)">
+                                <span class="error-message" id="fullNameError">Ad soyad en az 3 karakter olmalıdır</span>
+                            </div>
+                            <div>
+                                <input type="email" name="email" placeholder="E-posta" required 
+                                       class="w-full px-4 py-2 border rounded"
+                                       oninput="validateEmail(this)">
+                                <span class="error-message" id="emailError">Geçerli bir e-posta adresi giriniz</span>
+                            </div>
+                            <div>
+                                <input type="tel" name="phone" placeholder="Telefon (5XX XXX XX XX)" required 
+                                       pattern="[0-9]{10}" maxlength="10"
+                                       class="w-full px-4 py-2 border rounded"
+                                       oninput="validatePhone(this)">
+                                <span class="error-message" id="phoneError">Telefon numarası 10 haneli rakam olmalıdır (örn: 5551234567)</span>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="paymentStep" class="hidden">
+                        <h2 class="text-2xl font-semibold mb-4">Ödeme</h2>
+                        <p id="paymentGroupInfo" class="text-gray-600 mb-4"></p>
+                        <div id="reservationTimer" class="text-primary-600 mb-4"><i class="fas fa-clock mr-1"></i><span>29:59</span></div>
+                        <form id="paymentForm" class="space-y-4">
+                            <div>
+                                <input type="text" name="cardName" placeholder="Kart Üzerindeki İsim" required 
+                                       minlength="3" maxlength="50"
+                                       class="w-full px-4 py-2 border rounded uppercase"
+                                       oninput="validateCardName(this)">
+                                <span class="error-message" id="cardNameError">Kart üzerindeki ismi tam olarak giriniz</span>
+                            </div>
+                            <div>
+                                <input type="text" name="cardNumber" placeholder="Kart Numarası (16 haneli)" required 
+                                       pattern="[0-9]{16}" maxlength="16"
+                                       class="w-full px-4 py-2 border rounded"
+                                       oninput="validateCardNumber(this)">
+                                <span class="error-message" id="cardNumberError">Kart numarası 16 haneli rakam olmalıdır</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <input type="text" name="expiryDate" placeholder="AA/YY" required 
+                                           pattern="(0[1-9]|1[0-2])\/[0-9]{2}" maxlength="5"
+                                           class="w-full px-4 py-2 border rounded"
+                                           oninput="validateExpiryDate(this)">
+                                    <span class="error-message" id="expiryError">Geçerli tarih giriniz (AA/YY)</span>
+                                </div>
+                                <div>
+                                    <input type="text" name="cvv" placeholder="CVV (3 haneli)" required 
+                                           pattern="[0-9]{3}" maxlength="3"
+                                           class="w-full px-4 py-2 border rounded"
+                                           oninput="validateCVV(this)">
+                                    <span class="error-message" id="cvvError">CVV 3 haneli rakam olmalıdır</span>
+                                </div>
+                            </div>
+                        </form>
+                    </div></div>
+                    <div class="bg-gray-50 px-6 py-4 flex justify-between">
+                        <button id="cancelButton" class="text-gray-600">İptal</button>
+                        <button id="nextButton" class="bg-primary-600 text-white px-6 py-2 rounded">Devam Et</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="notificationToast" class="fixed bottom-4 right-4 z-50 hidden">
+            <div class="bg-white rounded-lg shadow-lg p-4">
+                <div class="flex items-center">
+                    <div id="notificationIcon" class="w-8 h-8 rounded-full flex items-center justify-center"><i class="fas"></i></div>
+                    <div class="ml-3">
+                        <p id="notificationTitle" class="font-medium"></p>
+                        <p id="notificationMessage" class="text-sm text-gray-600"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-gray-900 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 YZESKS. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+    <script>
+        // Form Validasyon Fonksiyonları
+        function showError(input, errorId, message) {
+            input.classList.add('input-error');
+            const errorEl = document.getElementById(errorId);
+            if (errorEl) {
+                errorEl.textContent = message || errorEl.textContent;
+                errorEl.classList.add('show');
+            }
+        }
+        
+        function clearError(input, errorId) {
+            input.classList.remove('input-error');
+            const errorEl = document.getElementById(errorId);
+            if (errorEl) errorEl.classList.remove('show');
+        }
+        
+        function validateFullName(input) {
+            const value = input.value.trim();
+            if (value.length < 3) {
+                showError(input, 'fullNameError', 'Ad soyad en az 3 karakter olmalıdır');
+                return false;
+            }
+            if (!/^[a-zA-ZğüşöçİĞÜŞÖÇ\s]+$/.test(value)) {
+                showError(input, 'fullNameError', 'Ad soyad sadece harf içermelidir');
+                return false;
+            }
+            clearError(input, 'fullNameError');
+            return true;
+        }
+        
+        function validateEmail(input) {
+            const value = input.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                showError(input, 'emailError', 'Geçerli bir e-posta adresi giriniz');
+                return false;
+            }
+            clearError(input, 'emailError');
+            return true;
+        }
+        
+        function validatePhone(input) {
+            // Sadece rakam girişine izin ver
+            input.value = input.value.replace(/[^0-9]/g, '');
+            const value = input.value;
+            
+            if (value.length > 0 && value.length < 10) {
+                showError(input, 'phoneError', 'Telefon numarası 10 haneli olmalıdır');
+                return false;
+            }
+            if (value.length === 10 && !value.startsWith('5')) {
+                showError(input, 'phoneError', 'Telefon numarası 5 ile başlamalıdır');
+                return false;
+            }
+            if (value.length === 10) {
+                clearError(input, 'phoneError');
+                return true;
+            }
+            return value.length === 0;
+        }
+        
+        function validateCardName(input) {
+            const value = input.value.trim();
+            if (value.length < 3) {
+                showError(input, 'cardNameError', 'Kart üzerindeki ismi tam giriniz');
+                return false;
+            }
+            clearError(input, 'cardNameError');
+            return true;
+        }
+        
+        function validateCardNumber(input) {
+            // Sadece rakam girişine izin ver
+            input.value = input.value.replace(/[^0-9]/g, '');
+            const value = input.value;
+            
+            if (value.length > 0 && value.length < 16) {
+                showError(input, 'cardNumberError', 'Kart numarası 16 haneli olmalıdır');
+                return false;
+            }
+            if (value.length === 16) {
+                clearError(input, 'cardNumberError');
+                return true;
+            }
+            return value.length === 0;
+        }
+        
+        function validateExpiryDate(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            
+            // Otomatik "/" ekleme
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            input.value = value;
+            
+            if (value.length === 5) {
+                const [month, year] = value.split('/');
+                const monthNum = parseInt(month);
+                if (monthNum < 1 || monthNum > 12) {
+                    showError(input, 'expiryError', 'Geçersiz ay (01-12 arası olmalı)');
+                    return false;
+                }
+                
+                // Geçmiş tarih kontrolü
+                const currentYear = new Date().getFullYear() % 100;
+                const currentMonth = new Date().getMonth() + 1;
+                const yearNum = parseInt(year);
+                
+                if (yearNum < currentYear || (yearNum === currentYear && monthNum < currentMonth)) {
+                    showError(input, 'expiryError', 'Kart süresi geçmiş olamaz');
+                    return false;
+                }
+                
+                clearError(input, 'expiryError');
+                return true;
+            }
+            return value.length === 0;
+        }
+        
+        function validateCVV(input) {
+            // Sadece rakam girişine izin ver
+            input.value = input.value.replace(/[^0-9]/g, '');
+            const value = input.value;
+            
+            if (value.length > 0 && value.length < 3) {
+                showError(input, 'cvvError', 'CVV 3 haneli olmalıdır');
+                return false;
+            }
+            if (value.length === 3) {
+                clearError(input, 'cvvError');
+                return true;
+            }
+            return value.length === 0;
+        }
+    </script>
+    <script src="src/app.js"></script>
+    <script src="src/paymentSimulator.js"></script>
+    <script src="src/reservationTimer.js"></script>
+</body>
+</html>

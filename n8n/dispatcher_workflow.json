@@ -1,0 +1,130 @@
+{
+  "name": "YZESKS Dispatcher",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "yzesks-dispatcher"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "action",
+              "value": "={{$json[\"body\"]?.action}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Action",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [{
+            "value1": "={{$json[\"action\"]}}",
+            "operation": "equal",
+            "value2": "reserve_spot"
+          }]
+        }
+      },
+      "name": "If Reserve",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 160]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [{
+            "value1": "={{$json[\"action\"]}}",
+            "operation": "equal",
+            "value2": "confirm_payment"
+          }]
+        }
+      },
+      "name": "If Confirm",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [{
+            "value1": "={{$json[\"action\"]}}",
+            "operation": "equal",
+            "value2": "cancel_reservation"
+          }]
+        }
+      },
+      "name": "If Cancel",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 440]
+    },
+    {
+      "parameters": {
+        "url": "={{$env[\"SUPABASE_URL\"]}}/rest/v1/rpc/reserve_spot",
+        "options": {},
+        "method": "POST",
+        "bodyParametersJson": "={ \"p_group_id\": $json[\"body\"].group_id, \"p_email\": $json[\"body\"].email, \"p_name\": $json[\"body\"].name, \"p_phone\": $json[\"body\"].phone }"
+      },
+      "name": "Call reserve_spot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 160]
+    },
+    {
+      "parameters": {
+        "url": "={{$env[\"SUPABASE_URL\"]}}/rest/v1/rpc/confirm_payment",
+        "options": {},
+        "method": "POST",
+        "bodyParametersJson": "={ \"p_registration_id\": $json[\"body\"].registration_id }"
+      },
+      "name": "Call confirm_payment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env[\"SUPABASE_URL\"]}}/rest/v1/rpc/cancel_reservation",
+        "options": {},
+        "method": "POST",
+        "bodyParametersJson": "={ \"p_registration_id\": $json[\"body\"].registration_id }"
+      },
+      "name": "Call cancel_reservation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 440]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Action": {"main": [[{"node":"If Reserve","type":"main","index":0},{"node":"If Confirm","type":"main","index":0},{"node":"If Cancel","type":"main","index":0}]]},
+    "If Reserve": {"main": [[{"node":"Call reserve_spot","type":"main","index":0}]]},
+    "If Confirm": {"main": [[{"node":"Call confirm_payment","type":"main","index":0}]]},
+    "If Cancel": {"main": [[{"node":"Call cancel_reservation","type":"main","index":0}]]}
+  }
+}

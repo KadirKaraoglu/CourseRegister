@@ -1,0 +1,88 @@
+{
+  "name": "Metrik Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "metrics",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"event_type\"]}}",
+              "operation": "exists"
+            }
+          ]
+        }
+      },
+      "name": "Metrik Kontrolü",
+      "type": "n8n-nodes-base.if",
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT log_registration_event($1, $2, $3, $4, $5);",
+        "values": {
+          "string": [
+            {
+              "name": "event_type",
+              "value": "={{$json[\"event_type\"]}}"
+            },
+            {
+              "name": "registration_id",
+              "value": "={{$json[\"registration_id\"]}}"
+            },
+            {
+              "name": "duration_ms",
+              "value": "={{$json[\"duration_ms\"]}}"
+            },
+            {
+              "name": "error_type",
+              "value": "={{$json[\"error_type\"]}}"
+            },
+            {
+              "name": "details",
+              "value": "={{$json[\"details\"]}}"
+            }
+          ]
+        }
+      },
+      "name": "Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://slack.webhook.url",
+        "options": {
+          "method": "POST",
+          "body": {
+            "text": "=⚠️ Metrik kaydı başarısız: {{$json[\"error\"]}}"
+          }
+        }
+      },
+      "name": "Hata Bildirimi",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [650, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Metrik Kontrolü", "type": "main", "index": 0}]]
+    },
+    "Metrik Kontrolü": {
+      "main": [
+        [{"node": "Supabase", "type": "main", "index": 0}],
+        [{"node": "Hata Bildirimi", "type": "main", "index": 0}]
+      ]
+    }
+  }
+}

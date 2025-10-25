@@ -1,0 +1,12 @@
+{
+  "name": "yzesks-tests",
+  "version": "1.0.0",
+  "description": "Concurrency tests for YZESKS stored procedures",
+  "main": "002_concurrency_test.js",
+  "scripts": {
+    "concurrency-test": "node 002_concurrency_test.js"
+  },
+  "dependencies": {
+    "pg": "^8.10.0"
+  }
+}

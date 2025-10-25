@@ -1,0 +1,8 @@
+node_modules
+mock-payment
+.git
+tests
+migrations
+n8n
+.github
+*.md

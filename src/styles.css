@@ -1,0 +1,49 @@
+/* Temel stiller */
+.notification-success {
+    background-color: #059669;
+}
+
+.notification-error {
+    background-color: #dc2626;
+}
+
+/* Loading göstergesi için stiller */
+.loading {
+    position: relative;
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: -0.75rem;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Form ve panel geçişleri için animasyon */
+.form-panel {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.form-panel.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.form-panel.fade-in {
+    opacity: 1;
+    pointer-events: auto;
+}

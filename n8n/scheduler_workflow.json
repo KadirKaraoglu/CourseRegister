@@ -1,0 +1,32 @@
+{
+  "name": "YZESKS Cleanup Scheduler",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            { "hour": 0, "minute": 0 }
+          ]
+        }
+      },
+      "name": "Cron",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env[\"SUPABASE_URL\"]}}/rest/v1/rpc/cleanup_expired_reservations",
+        "method": "POST",
+        "options": {}
+      },
+      "name": "Call cleanup_expired_reservations",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [500, 300]
+    }
+  ],
+  "connections": {
+    "Cron": {"main":[[{"node":"Call cleanup_expired_reservations","type":"main","index":0}]]}
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "egitim-app",
+  "version": "1.0.0",
+  "description": "Yapay Zeka Eğitim Kayıt Sistemi",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx serve frontend",
+    "test": "jest"
+  },
+  "dependencies": {
+    "serve": "^14.2.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "autoprefixer": "^10.4.21",
+    "jest": "^29.7.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.15"
+  }
+}

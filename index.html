@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YZESKS - Yapay Zeka Eğitim Kayıt Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Ana İçerik -->
+    <div class="container mx-auto p-6">
+        <h1 class="text-2xl font-bold mb-6">Yapay Zeka Eğitim Kayıt Sistemi</h1>
+        
+        <!-- Grup Listesi -->
+        <div id="groupList" class="grid gap-4 md:grid-cols-2">
+            <!-- Grup şablonu -->
+            <template id="groupTemplate">
+                <div class="group-item bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="font-semibold text-lg group-name"></h3>
+                    <p class="text-gray-600 text-sm mt-1">
+                        <span class="group-date"></span>
+                        <span class="group-capacity"></span>
+                    </p>
+                    <button class="register-btn mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Kayıt Ol
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Kayıt Formu Modal -->
+    <div id="registrationForm" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 class="text-xl font-semibold mb-4">Kayıt Formu</h2>
+            <form id="registerForm">
+                <input type="hidden" id="selectedGroupId" name="groupId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
+                        <input type="text" name="fullName" required 
+                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
+                        <input type="email" name="email" required
+                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+                        <input type="tel" name="phone" required
+                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="mt-6 flex gap-3">
+                    <button type="submit" 
+                            class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        Devam Et
+                    </button>
+                    <button type="button" onclick="resetView()"
+                            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        İptal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ödeme Paneli -->
+    <div id="paymentPanel" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Ödeme Bilgileri</h2>
+                <div id="reservationTimer" class="text-sm font-medium"></div>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+                Bu bir test ödeme ekranıdır. Farklı ödeme senaryolarını test edebilirsiniz.
+            </p>
+            <form id="paymentForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kart Numarası</label>
+                    <input type="text" name="cardNumber" pattern="[0-9]{16}" 
+                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" 
+                           placeholder="1234 5678 9012 3456" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Son Kullanma</label>
+                        <input type="text" name="expiry" pattern="(0[1-9]|1[0-2])\/[0-9]{2}" 
+                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" 
+                               placeholder="MM/YY" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                        <input type="text" name="cvv" pattern="[0-9]{3,4}" 
+                               class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" 
+                               placeholder="123" required>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" id="confirmPayment"
+                            class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        Ödemeyi Onayla
+                    </button>
+                    <button type="button" id="cancelPayment"
+                            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        Vazgeç
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bildirim -->
+    <div id="notification" class="hidden fixed bottom-4 right-4 p-4 rounded-lg text-white"></div>
+
+    <script type="module" src="/src/app.js"></script>
+</body>
+</html>

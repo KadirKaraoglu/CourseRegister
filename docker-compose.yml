@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # Frontend statik dosyalar için Nginx
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/usr/share/nginx/html
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - n8n
+    networks:
+      - yzesks-network
+
+  # n8n workflow engine
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - N8N_SSL_CERT=/etc/letsencrypt/live/${DOMAIN}/fullchain.pem
+      - N8N_SSL_KEY=/etc/letsencrypt/live/${DOMAIN}/privkey.pem
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=${SUPABASE_HOST}
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${SUPABASE_DB}
+      - DB_POSTGRESDB_USER=${SUPABASE_USER}
+      - DB_POSTGRESDB_PASSWORD=${SUPABASE_PASSWORD}
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./workflows:/home/node/.n8n/workflows
+      - ./certbot/conf:/etc/letsencrypt:ro
+    networks:
+      - yzesks-network
+    restart: unless-stopped
+
+  # SSL sertifikaları için Certbot
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${SSL_EMAIL} -d ${DOMAIN} --agree-tos
+
+volumes:
+  n8n_data:
+
+networks:
+  yzesks-network:
+    driver: bridge
